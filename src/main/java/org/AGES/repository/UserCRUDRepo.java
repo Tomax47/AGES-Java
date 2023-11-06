@@ -12,4 +12,5 @@ public interface UserCRUDRepo extends CRUDRepo<User> {
     User findByEmail(String email);
     void saveUserLoginCookie(String cookieUUID, long userId) throws SQLException;
     long getUserId(String email);
+    long checkUserExistenceByLoginCookie(String loginCookie) throws SQLException;
 }

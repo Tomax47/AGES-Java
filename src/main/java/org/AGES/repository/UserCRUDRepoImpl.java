@@ -20,6 +20,7 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     private static final String INSERT_INTO_USERS = "INSERT INTO users(name,surname,email,password) VALUES ";
     private static final String SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE email=";
     private static final String INSERT_INTO_USERS_COOKIES = "INSERT INTO users_cookies(login_cookie_uuid,user_id) VALUES ";
+    private static final String SELECT_USER_BY_LOGIN_COOKIE_UUID = "SELECT user_id FROM users_cookies WHERE login_cookie_uuid=";
 
     public UserCRUDRepoImpl(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -115,6 +116,26 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
         } catch (IllegalStateException e) {
             throw new RuntimeException(e);
         }
+        return userId;
+    }
+
+    @Override
+    public long checkUserExistenceByLoginCookie(String loginCookie) throws SQLException{
+        long userId = 0;
+        try {
+            Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_LOGIN_COOKIE_UUID + "(?)");
+            preparedStatement.setString(1, loginCookie);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                userId = resultSet.getLong("user_id");
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         return userId;
     }
 

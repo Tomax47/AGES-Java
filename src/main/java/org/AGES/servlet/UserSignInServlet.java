@@ -29,7 +29,32 @@ public class UserSignInServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("jsp/login.jsp").forward(req,resp);
+
+        Cookie[] cookies = req.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("login")) {
+                    String uuid = cookie.getValue();
+                    try {
+                        //Checking the userId by the loginCookieUUID
+                        long userId = userCRUDRepo.checkUserExistenceByLoginCookie(uuid);
+                        if (userId != 0) {
+                            HttpSession session = req.getSession();
+                            session.setAttribute("authenticated", true);
+                            session.setAttribute("userId",userId);
+
+                            System.out.println("\n\nLOGGED THE USER IN USING THE LOGIN COOKIE!!!");
+                            resp.sendRedirect("/");
+                        }
+                    } catch (SQLException e) {
+                        //TODO: HANDLE THE EXCEPTION!
+                    }
+                }
+            }
+        } else {
+            req.getRequestDispatcher("jsp/login.jsp").forward(req,resp);
+        }
     }
 
     @Override
@@ -55,7 +80,7 @@ public class UserSignInServlet extends HttpServlet {
                 userCRUDRepo.saveUserLoginCookie(loginCookieUUID, getUserIdFromSession(resp, httpSession));
 
                 //Initializing the login cookie
-                Cookie loginCookie = new Cookie("login","authenticated");
+                Cookie loginCookie = new Cookie("login",loginCookieUUID);
                 resp.addCookie(loginCookie);
                 loginCookie.setMaxAge(300);
 

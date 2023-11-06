@@ -2,15 +2,15 @@ package org.AGES.servlet;
 
 import org.AGES.repository.UserCRUDRepo;
 import org.AGES.repository.UserRegistrationService;
+import org.postgresql.jdbc.UUIDArrayAssistant;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.UUID;
 
 @WebServlet("/login")
 public class UserSignInServlet extends HttpServlet {
@@ -39,6 +39,18 @@ public class UserSignInServlet extends HttpServlet {
 
         try {
             if (userCRUDRepo.login(email,password)) {
+                //Open a new session
+                HttpSession httpSession = req.getSession(true);
+                httpSession.setAttribute("authenticated",true);
+
+                String loginCookieUUID = UUID.randomUUID().toString();
+                //TODO: INSERT THE UUID INTO THE DATABASE WITH THE USER_ID
+                //ADD METHODS TO GET THE USER_ID
+
+                Cookie loginCookie = new Cookie("login","authenticated");
+                resp.addCookie(loginCookie);
+                loginCookie.setMaxAge(300);
+
                 resp.sendRedirect("/");
             } else {
                 resp.sendRedirect("/login");

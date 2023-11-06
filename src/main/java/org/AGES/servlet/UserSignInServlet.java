@@ -39,14 +39,22 @@ public class UserSignInServlet extends HttpServlet {
 
         try {
             if (userCRUDRepo.login(email,password)) {
-                //Open a new session
+                //Opening a new session
                 HttpSession httpSession = req.getSession(true);
-                httpSession.setAttribute("authenticated",true);
 
+                //Setting session's attr
+                long userId = userCRUDRepo.getUserId(email);
+                if (userId != 0) {
+                    httpSession.setAttribute("userId", userId);
+                    httpSession.setAttribute("authenticated",true);
+                }
+
+                //Saving the userId & the LoginCookieUUID into the DB
                 String loginCookieUUID = UUID.randomUUID().toString();
-                //TODO: INSERT THE UUID INTO THE DATABASE WITH THE USER_ID
-                //ADD METHODS TO GET THE USER_ID
+                System.out.println("CHECKING : \nLoginCookieUUID -> "+loginCookieUUID+"\nUserID -> "+getUserIdFromSession(resp, httpSession));
+                userCRUDRepo.saveUserLoginCookie(loginCookieUUID, getUserIdFromSession(resp, httpSession));
 
+                //Initializing the login cookie
                 Cookie loginCookie = new Cookie("login","authenticated");
                 resp.addCookie(loginCookie);
                 loginCookie.setMaxAge(300);
@@ -59,5 +67,31 @@ public class UserSignInServlet extends HttpServlet {
             throw new RuntimeException("Error logging the user in : " + e.getMessage(), e);
         }
     }
+
+
+    //Getting the userId. START
+    private long getUserIdFromSession(HttpServletResponse resp, HttpSession session) throws IOException {
+        if (session != null && session.getAttribute("authenticated") != null) {
+            return getLoggedInUserId(session);
+        } else {
+            resp.sendRedirect("/");
+            throw new IllegalStateException("User is not logged in.");
+        }
+    }
+
+    private long getLoggedInUserId(HttpSession session) {
+        Object userIdObject = session.getAttribute("userId");
+
+        if (userIdObject != null) {
+            try {
+                return Long.parseLong(userIdObject.toString());
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("User ID in session is not a valid number.");
+            }
+        } else {
+            throw new IllegalStateException("User ID is not found in session.");
+        }
+    }
+    //END
 
 }

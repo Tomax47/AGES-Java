@@ -5,6 +5,8 @@ import org.AGES.model.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -17,6 +19,7 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     private PasswordEncoder passwordEncoder;
     private static final String INSERT_INTO_USERS = "INSERT INTO users(name,surname,email,password) VALUES ";
     private static final String SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE email=";
+    private static final String INSERT_INTO_USERS_COOKIES = "INSERT INTO users_cookies(login_cookie_uuid,user_id) VALUES ";
 
     public UserCRUDRepoImpl(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -84,6 +87,35 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
         } catch (SQLException e) {
             throw new RuntimeException("Error registering user: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void saveUserLoginCookie(String cookieUUID, long userId) throws SQLException {
+        Connection connection = dataSource.getConnection();
+
+        System.out.println("A LOGIN COOKIE IS BEING INSERTED : "+cookieUUID+" ,UserId : "+userId);
+        PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_USERS_COOKIES+"(?,?)");
+        preparedStatement.setString(1,cookieUUID);
+        preparedStatement.setLong(2,userId);
+
+        preparedStatement.executeUpdate();
+        ResultSet resultSet = preparedStatement.getGeneratedKeys();
+        //Checking the process if done
+        System.out.println("COOKIE HAS BEEN INSERTED -> RESULT-SET GEN-KEYS : "+resultSet);
+    }
+
+    @Override
+    public long getUserId(String email) {
+        long userId = 0;
+        try {
+            User user = findByEmail(email);
+            if (user != null) {
+                userId = user.getId();
+            }
+        } catch (IllegalStateException e) {
+            throw new RuntimeException(e);
+        }
+        return userId;
     }
 
     public List findAll() {

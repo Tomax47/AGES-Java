@@ -1,0 +1,16 @@
+body {
+    font-family: 'MedievalSharp';font-size: 22px;
+}
+
+h1 {
+    color: #312e2e;
+    align-self: center;
+    margin: 1em;
+    font-size: 3em;
+}
+
+.store-name {
+    color: #641515;
+    font-size: 1.5em;
+}
+

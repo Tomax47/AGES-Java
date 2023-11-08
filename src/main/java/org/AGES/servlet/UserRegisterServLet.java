@@ -47,6 +47,7 @@ public class UserRegisterServLet extends HttpServlet {
             userRegistrationService.register(registerForm);
             resp.sendRedirect("/login");
         } catch (SQLException e) {
+            //TODO: HANDLE IN A BETTER WAY
             throw new RuntimeException("Error registering user: " + e.getMessage(), e);
         }
     }

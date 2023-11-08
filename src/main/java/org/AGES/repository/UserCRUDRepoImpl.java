@@ -4,6 +4,7 @@ import org.AGES.model.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.sql.DataSource;
+import java.security.spec.RSAOtherPrimeInfo;
 import java.sql.*;
 import java.util.List;
 
@@ -13,8 +14,10 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     private PasswordEncoder passwordEncoder;
     private static final String INSERT_INTO_USERS = "INSERT INTO users(name,surname,email,password) VALUES ";
     private static final String SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE email=";
+    private static final String SELECT_USER_BY_ID = "SELECT * FROM users WHERE id=";
     private static final String INSERT_INTO_USERS_COOKIES = "INSERT INTO users_cookies(login_cookie_uuid,user_id) VALUES ";
     private static final String SELECT_USER_BY_LOGIN_COOKIE_UUID = "SELECT user_id FROM users_cookies WHERE login_cookie_uuid=";
+    private static final String UPDATE_USER_INFO = "UPDATE users SET name=?, surname=?, age=?, number=?, address=? WHERE id=?";
 
     public UserCRUDRepoImpl(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -85,6 +88,36 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     }
 
     @Override
+    public User findById(Long userId) {
+        User user = null;
+        try {
+            Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_ID+"(?)");
+            preparedStatement.setLong(1,userId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                user = User.builder()
+                        .id(resultSet.getLong("id"))
+                        .name(resultSet.getString("name"))
+                        .surname(resultSet.getString("surname"))
+                        .age(resultSet.getInt("age"))
+                        .number(resultSet.getString("number"))
+                        .address(resultSet.getString("address"))
+                        .email(resultSet.getString("email"))
+                        .password(resultSet.getString("password"))
+                        .role(resultSet.getString("role"))
+                        .build();
+            }
+            return user;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error registering user: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void saveUserLoginCookie(String cookieUUID, long userId) throws SQLException {
         Connection connection = dataSource.getConnection();
 
@@ -97,6 +130,39 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
         ResultSet resultSet = preparedStatement.getGeneratedKeys();
         //Checking the process if done
         System.out.println("COOKIE HAS BEEN INSERTED -> RESULT-SET GEN-KEYS : "+resultSet);
+    }
+
+    @Override
+    public void updateUserInformation(String name, String surname, int age, String number, String address, String email) throws SQLException {
+        User user = findByEmail(email);
+        System.out.println("User has been found |UPDATING| -> "+email);
+        if (user != null) {
+            try {
+                Connection connection = dataSource.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER_INFO);
+
+                preparedStatement.setString(1,name);
+                preparedStatement.setString(2,surname);
+                preparedStatement.setInt(3,age);
+                preparedStatement.setString(4,number);
+                preparedStatement.setString(5,address);
+                preparedStatement.setLong(6,user.getId());
+
+                int affectedRows = preparedStatement.executeUpdate();
+
+                //Process Check
+                if (affectedRows > 0) {
+                    System.out.println("User has been updated!");
+                } else {
+                    System.out.println("Cant update the user!");
+                }
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            //TODO: HANDLE
+        }
     }
 
     @Override

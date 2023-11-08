@@ -17,7 +17,6 @@ public class AuthenticationFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         HttpSession session = request.getSession();
@@ -27,6 +26,7 @@ public class AuthenticationFilter implements Filter {
         Boolean isLoginPage = request.getRequestURI().equals("/login");
         Boolean isRegistrationPage = request.getRequestURI().equals("/register");
 
+        //Checking the user's auth-state
         if (sessionExists) {
             isAuthenticated = (Boolean) session.getAttribute("authenticated");
             if (isAuthenticated == null) {
@@ -34,15 +34,18 @@ public class AuthenticationFilter implements Filter {
             }
         }
 
+        //Disallowing the logged-in user from reaching the login\registration pages
         if (isAuthenticated && isLoginPage || isAuthenticated && isRegistrationPage) {
             System.out.println("USER IS LOGGED IN, REDIRECTING HOME");
             response.sendRedirect("/");
 
+            //Allowing the request to the destination
         } else if (isAuthenticated && !isLoginPage || !isAuthenticated && isLoginPage ||
                 isAuthenticated && !isRegistrationPage || !isAuthenticated && isRegistrationPage) {
-            System.out.println("FILTER : REDIRECTING TO THE REQUESTED PAGE!");
+            System.out.println("FILTER : REDIRECTING TO THE REQUESTED PAGE! Destination -> "+ request.getRequestURI());
             filterChain.doFilter(request, response);
 
+            //Not logged-in user, redirecting to the login page |It's possible for the user to access the registration page as well|
         } else {
             System.out.println("USER AINT LOGGED IN, REDIRECTING TO THE LOGIN PAGE");
             response.sendRedirect("/login");

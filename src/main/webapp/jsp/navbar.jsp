@@ -9,18 +9,24 @@
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="/">Home</a>
         </li>
+        <!-- Checking the user's auth-state for reviewing the login & register options -->
+        <%
+          if (session == null || session.getAttribute("authenticated") == null) {
+        %>
         <li class="nav-item">
           <a class="nav-link" href="login">Sign In</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="register">Register</a>
         </li>
-
+        <% } else { %>
       </ul>
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
+      <form class="d-flex" action="/logout" method="post">
+        <button class="btn btn-outline-dark" type="submit">logout</button>
       </form>
+      <% } %>
+
     </div>
   </div>
 </nav>
+

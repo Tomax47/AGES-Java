@@ -1,3 +1,4 @@
+<%@ page import="org.AGES.repository.UserCRUDRepoImpl" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -13,7 +14,7 @@
         WELCOME TO AGES
     </div>
     <div>
-        <strong class="store-name">ANCIENT GOODS E-STORE</strong>
+        <strong class="store-name">Ancient Goods E-Store</strong>
     </div>
 </h1>
 </body>

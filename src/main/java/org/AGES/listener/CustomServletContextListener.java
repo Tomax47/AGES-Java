@@ -9,8 +9,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-
-@WebListener("/")
+@WebListener("/register")
 public class CustomServletContextListener implements ServletContextListener {
     private static final String DB_USER = "postgres";
     private static final String DB_PASSWORD = "1234";
@@ -20,8 +19,6 @@ public class CustomServletContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-
-
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(DB_DRIVER);
         dataSource.setUsername(DB_USER);

@@ -1,15 +1,13 @@
 package org.AGES.servlet;
 
 import org.AGES.repository.UserCRUDRepo;
-import org.AGES.repository.UserRegistrationService;
-import org.postgresql.jdbc.UUIDArrayAssistant;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.UUID;
 
 @WebServlet("/login")
@@ -32,7 +30,10 @@ public class UserSignInServlet extends HttpServlet {
 
         Cookie[] cookies = req.getCookies();
 
-        if (cookies != null) {
+        //Checking for an existence of the loginCookie in the cookies list
+        if (cookies != null && Arrays.stream(cookies).anyMatch(cookie -> {
+            return cookie.getName().equals("login");
+        })) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("login")) {
                     String uuid = cookie.getValue();
@@ -45,7 +46,6 @@ public class UserSignInServlet extends HttpServlet {
                             session.setAttribute("userId",userId);
 
                             System.out.println("\n\nLOGGED THE USER IN USING THE LOGIN COOKIE!!!");
-                            resp.sendRedirect("/");
                         }
                     } catch (SQLException e) {
                         //TODO: HANDLE THE EXCEPTION!

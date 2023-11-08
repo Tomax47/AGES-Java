@@ -1,15 +1,9 @@
 package org.AGES.repository;
 
-import com.sun.security.auth.NTUserPrincipal;
 import org.AGES.model.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.sql.*;
 import java.util.List;
 

@@ -42,10 +42,20 @@ public class UserSignInServlet extends HttpServlet {
                         long userId = userCRUDRepo.checkUserExistenceByLoginCookie(uuid);
                         if (userId != 0) {
                             HttpSession session = req.getSession();
-                            session.setAttribute("authenticated", true);
-                            session.setAttribute("userId",userId);
+                            Boolean userIsAuthenticated = (Boolean) session.getAttribute("authenticated");
 
-                            System.out.println("\n\nLOGGED THE USER IN USING THE LOGIN COOKIE!!!");
+                            //Checking if the user is actually logged in
+                            if (userIsAuthenticated == null) {
+                                session.setAttribute("authenticated", true);
+                                session.setAttribute("userId",userId);
+
+                                System.out.println("\n\nLOGGED THE USER IN USING THE LOGIN COOKIE!!!");
+                                resp.sendRedirect("/");
+
+                                //Redirecting to the main page, if the user is logged in without sending a loginCookie login request again!
+                            } else {
+                                resp.sendRedirect("/");
+                            }
                         }
                     } catch (SQLException e) {
                         //TODO: HANDLE THE EXCEPTION!

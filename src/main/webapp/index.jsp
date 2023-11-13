@@ -1,4 +1,4 @@
-<%@ page import="org.AGES.repository.UserCRUDRepoImpl" %>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -17,5 +17,15 @@
         <strong class="store-name">Ancient Goods E-Store</strong>
     </div>
 </h1>
+
+<center>
+    <div class="products-page">
+        <a href="/products" style="font-weight: bold; color: #641515; text-decoration: none; border: black; border-radius: 15px; font-size: 2em">Browse The Products</a>
+    </div>
+
+    <div class="products-page">
+        <a href="/new_product" style="font-weight: bold; color: #1f1e1e; text-decoration: none; border: black; border-radius: 15px; font-size: 2em">Become A Seller</a>
+    </div>
+</center>
 </body>
 </html>

@@ -1,9 +1,9 @@
-package org.AGES.repository;
+package org.AGES.repository.user;
 
 import org.AGES.dto.RegisterForm;
 
 import java.sql.SQLException;
 
 public interface UserRegistrationService {
-    void register(RegisterForm registerForm) throws SQLException;
+    int register(RegisterForm registerForm) throws SQLException;
 }

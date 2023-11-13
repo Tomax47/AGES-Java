@@ -1,10 +1,9 @@
-package org.AGES.repository;
+package org.AGES.repository.user;
 
 import org.AGES.model.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.sql.DataSource;
-import java.security.spec.RSAOtherPrimeInfo;
 import java.sql.*;
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     private static final String SELECT_USER_BY_ID = "SELECT * FROM users WHERE id=";
     private static final String INSERT_INTO_USERS_COOKIES = "INSERT INTO users_cookies(login_cookie_uuid,user_id) VALUES ";
     private static final String SELECT_USER_BY_LOGIN_COOKIE_UUID = "SELECT user_id FROM users_cookies WHERE login_cookie_uuid=";
-    private static final String UPDATE_USER_INFO = "UPDATE users SET name=?, surname=?, age=?, number=?, address=? WHERE id=?";
+    private static final String UPDATE_USER_INFO = "UPDATE users SET name=?, surname=?, age=?, number=?, address=?, image=? WHERE id=?";
 
     public UserCRUDRepoImpl(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -25,18 +24,24 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     }
 
     public void save(User user) throws SQLException {
-        Connection connection = dataSource.getConnection();
-        System.out.println("USER IS GETTING INSERTED : "+user.getName());
-        PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_USERS+"(?,?,?,?)");
-        preparedStatement.setString(1,user.getName());
-        preparedStatement.setString(2, user.getSurname());
-        preparedStatement.setString(3, user.getEmail());
-        preparedStatement.setString(4, user.getPassword());
 
-        preparedStatement.executeUpdate();
-        ResultSet resultSet = preparedStatement.getGeneratedKeys();
-        //Checking the process if done
-        System.out.println("RESULT-SET GEN-KEYS : "+resultSet);
+        try (Connection connection = dataSource.getConnection()) {
+
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_USERS+"(?,?,?,?)");
+            System.out.println("USER IS GETTING INSERTED : "+user.getName());
+            preparedStatement.setString(1,user.getName());
+            preparedStatement.setString(2, user.getSurname());
+            preparedStatement.setString(3, user.getEmail());
+            preparedStatement.setString(4, user.getPassword());
+
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            //Checking the process if done
+            System.out.println("RESULT-SET GEN-KEYS : "+resultSet);
+
+        } catch (SQLException e) {
+            //TODO: HANDLE THE EXCEPTION
+        }
     }
 
     public boolean login(String email, String password) throws SQLException {
@@ -107,6 +112,7 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
                         .address(resultSet.getString("address"))
                         .email(resultSet.getString("email"))
                         .password(resultSet.getString("password"))
+                        .image(resultSet.getBytes("image"))
                         .role(resultSet.getString("role"))
                         .build();
             }
@@ -133,10 +139,11 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     }
 
     @Override
-    public void updateUserInformation(String name, String surname, int age, String number, String address, String email) throws SQLException {
+    public void updateUserInformation(String name, String surname, int age, String number, String address, String email, byte[] image, long userId) throws SQLException {
         User user = findByEmail(email);
         System.out.println("User has been found |UPDATING| -> "+email);
-        if (user != null) {
+        //Checking if user's req is valid & authorized
+        if (user != null && user.getId() == userId) {
             try {
                 Connection connection = dataSource.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER_INFO);
@@ -146,7 +153,8 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
                 preparedStatement.setInt(3,age);
                 preparedStatement.setString(4,number);
                 preparedStatement.setString(5,address);
-                preparedStatement.setLong(6,user.getId());
+                preparedStatement.setBytes(6,image);
+                preparedStatement.setLong(7,user.getId());
 
                 int affectedRows = preparedStatement.executeUpdate();
 
@@ -161,7 +169,7 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
                 throw new RuntimeException(e);
             }
         } else {
-            //TODO: HANDLE
+            System.out.println("UNAUTHORIZED ACTION -> CAN'T CHANGE DATA OF THE EMAIL THAT AIN'T YOURS!");
         }
     }
 

@@ -1,9 +1,13 @@
 package org.AGES.listener;
 
-import org.AGES.repository.UserCRUDRepo;
-import org.AGES.repository.UserCRUDRepoImpl;
-import org.AGES.repository.UserRegistrationService;
-import org.AGES.repository.UserRegistrationServiceImpl;
+import org.AGES.repository.product.ProductCRUDRepo;
+import org.AGES.repository.product.ProductCRUDRepoImpl;
+import org.AGES.repository.product.ProductRegistrationService;
+import org.AGES.repository.product.ProductRegistrationServiceImpl;
+import org.AGES.repository.user.UserCRUDRepo;
+import org.AGES.repository.user.UserCRUDRepoImpl;
+import org.AGES.repository.user.UserRegistrationService;
+import org.AGES.repository.user.UserRegistrationServiceImpl;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -25,14 +29,19 @@ public class CustomServletContextListener implements ServletContextListener {
         dataSource.setPassword(DB_PASSWORD);
         dataSource.setUrl(DB_URL);
 
-
         ServletContext servletContext = servletContextEvent.getServletContext();
 
+        //User
         UserCRUDRepo userCRUDRepo = new UserCRUDRepoImpl(dataSource);
         servletContext.setAttribute("UserCRUDRepo",userCRUDRepo);
         UserRegistrationService userRegistrationService= new UserRegistrationServiceImpl(userCRUDRepo);
         servletContext.setAttribute("UserRegistrationService",userRegistrationService);
 
+        //Product
+        ProductCRUDRepo productCRUDRepo = new ProductCRUDRepoImpl(dataSource);
+        servletContext.setAttribute("ProductCRUDRepo", productCRUDRepo);
+        ProductRegistrationService productRegistrationService = new ProductRegistrationServiceImpl(productCRUDRepo);
+        servletContext.setAttribute("ProductRegistrationService", productRegistrationService);
     }
 
     @Override

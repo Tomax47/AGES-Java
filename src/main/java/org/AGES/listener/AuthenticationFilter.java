@@ -46,6 +46,8 @@ public class AuthenticationFilter implements Filter {
             filterChain.doFilter(request, response);
 
             //Not logged-in user, redirecting to the login page |It's possible for the user to access the registration page as well|
+        } else if (request.getRequestURI().equals("/") || request.getRequestURI().equals("/index.jsp")) {
+            filterChain.doFilter(request, response);
         } else {
             System.out.println("USER AINT LOGGED IN, REDIRECTING TO THE LOGIN PAGE");
             response.sendRedirect("/login");

@@ -1,11 +1,12 @@
 package org.AGES.servlet;
 
-import org.AGES.repository.UserCRUDRepo;
+import org.AGES.repository.user.UserCRUDRepo;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.UUID;
@@ -16,6 +17,7 @@ public class UserSignInServlet extends HttpServlet {
     private static final String DB_USER = "postgres";
     private static final String DB_PASSWORD = "1234";
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/ancient_goods_estore";
+    private static final String invalidCredentialsErrorMsg = "Invalid Email Or Password!";
 
     private UserCRUDRepo userCRUDRepo;
 
@@ -96,6 +98,7 @@ public class UserSignInServlet extends HttpServlet {
 
                 resp.sendRedirect("/");
             } else {
+                req.getSession().setAttribute("loginErrorMessage", invalidCredentialsErrorMsg);
                 resp.sendRedirect("/login");
             }
         } catch (SQLException e) {

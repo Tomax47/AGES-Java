@@ -15,6 +15,7 @@ public class UserDto {
     private String password;
     private String role;
 
+    //TODO: TO SUE LATER ON
     public boolean isAdmin() {
         return this.role.equals("Admin");
     }

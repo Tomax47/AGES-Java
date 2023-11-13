@@ -1,8 +1,8 @@
 package org.AGES.servlet;
 
 import org.AGES.dto.RegisterForm;
-import org.AGES.repository.UserCRUDRepo;
-import org.AGES.repository.UserRegistrationService;
+import org.AGES.repository.user.UserCRUDRepo;
+import org.AGES.repository.user.UserRegistrationService;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,6 +19,7 @@ public class UserRegisterServLet extends HttpServlet {
     private static final String DB_USER = "postgres";
     private static final String DB_PASSWORD = "1234";
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/ancient_goods_estore";
+    private static final String nullRegistrationValuesErrorMsg = "None of the fields must be left blank!";
 
     private UserCRUDRepo userCRUDRepo;
     private UserRegistrationService userRegistrationService;
@@ -44,8 +45,13 @@ public class UserRegisterServLet extends HttpServlet {
         registerForm.setPassword(req.getParameter("password"));
 
         try {
-            userRegistrationService.register(registerForm);
-            resp.sendRedirect("/login");
+            int isUserRegistered = userRegistrationService.register(registerForm);
+            if (isUserRegistered == 1) {
+                resp.sendRedirect("/login");
+            } else {
+                req.getSession().setAttribute("registerErrorMessage", nullRegistrationValuesErrorMsg);
+                resp.sendRedirect("/register");
+            }
         } catch (SQLException e) {
             //TODO: HANDLE IN A BETTER WAY
             throw new RuntimeException("Error registering user: " + e.getMessage(), e);

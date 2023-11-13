@@ -23,6 +23,12 @@
         <li class="nav-item">
           <a class="nav-link" href="profile">Profile</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="products">Market</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="new_product">Sell Something</a>
+        </li>
       </ul>
       <form class="d-flex" action="/logout" method="post">
         <button class="btn btn-outline-dark" type="submit">logout</button>

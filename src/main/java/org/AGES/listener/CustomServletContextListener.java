@@ -4,10 +4,7 @@ import org.AGES.repository.product.ProductCRUDRepo;
 import org.AGES.repository.product.ProductCRUDRepoImpl;
 import org.AGES.repository.product.ProductRegistrationService;
 import org.AGES.repository.product.ProductRegistrationServiceImpl;
-import org.AGES.repository.user.UserCRUDRepo;
-import org.AGES.repository.user.UserCRUDRepoImpl;
-import org.AGES.repository.user.UserRegistrationService;
-import org.AGES.repository.user.UserRegistrationServiceImpl;
+import org.AGES.repository.user.*;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -36,6 +33,8 @@ public class CustomServletContextListener implements ServletContextListener {
         servletContext.setAttribute("UserCRUDRepo",userCRUDRepo);
         UserRegistrationService userRegistrationService= new UserRegistrationServiceImpl(userCRUDRepo);
         servletContext.setAttribute("UserRegistrationService",userRegistrationService);
+        UserGetInformationService userGetInformationService = new UserGetInformationServiceImpl(userCRUDRepo);
+        servletContext.setAttribute("UserGetInformationService",userGetInformationService);
 
         //Product
         ProductCRUDRepo productCRUDRepo = new ProductCRUDRepoImpl(dataSource);

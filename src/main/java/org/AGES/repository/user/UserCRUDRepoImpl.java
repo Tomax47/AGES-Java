@@ -5,6 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserCRUDRepoImpl implements UserCRUDRepo{
@@ -12,35 +13,60 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     private DataSource dataSource;
     private PasswordEncoder passwordEncoder;
     private static final String INSERT_INTO_USERS = "INSERT INTO users(name,surname,email,password) VALUES ";
+    private static final String SELECT_ALL_USERS = "SELECT * FROM users";
     private static final String SELECT_USER_BY_EMAIL = "SELECT * FROM users WHERE email=";
     private static final String SELECT_USER_BY_ID = "SELECT * FROM users WHERE id=";
     private static final String INSERT_INTO_USERS_COOKIES = "INSERT INTO users_cookies(login_cookie_uuid,user_id) VALUES ";
     private static final String SELECT_USER_BY_LOGIN_COOKIE_UUID = "SELECT user_id FROM users_cookies WHERE login_cookie_uuid=";
     private static final String UPDATE_USER_INFO = "UPDATE users SET name=?, surname=?, age=?, number=?, address=?, image=? WHERE id=?";
+    private static final String DELETE_FROM_USERS = "DELETE FROM users WHERE email=";
+    private static final String DELETE_FROM_USERS_COOKIES = "DELETE FROM users_cookies WHERE user_id=";
+    private static final String DELETE_USERS_PRODUCTS_FROM_PRODUCTS = "DELETE FROM products WHERE seller_id=";
+    private static final String INSERT_INTO_USERS_BLACKLIST = "INSERT INTO users_blacklist(email) VALUES ";
+    private static final String SELECT_ALL_FROM_USERS_BLACKLIST = "SELECT * FROM users_blacklist WHERE email=";
 
     public UserCRUDRepoImpl(DataSource dataSource) {
         this.dataSource = dataSource;
         passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    public void save(User user) throws SQLException {
+    public int save(User user) throws SQLException {
 
         try (Connection connection = dataSource.getConnection()) {
 
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_USERS+"(?,?,?,?)");
-            System.out.println("USER IS GETTING INSERTED : "+user.getName());
-            preparedStatement.setString(1,user.getName());
-            preparedStatement.setString(2, user.getSurname());
-            preparedStatement.setString(3, user.getEmail());
-            preparedStatement.setString(4, user.getPassword());
+            int success = 0;
+            //Checking if the email ain't blacklisted
+            PreparedStatement isBlackListedCheck = connection.prepareStatement(SELECT_ALL_FROM_USERS_BLACKLIST+"(?)");
+            isBlackListedCheck.setString(1,user.getEmail());
+            ResultSet blackListedResultSet = isBlackListedCheck.executeQuery();
 
-            preparedStatement.executeUpdate();
-            ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            //Checking the process if done
-            System.out.println("RESULT-SET GEN-KEYS : "+resultSet);
+
+            if (!blackListedResultSet.next()) {
+                PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_USERS+"(?,?,?,?)");
+                System.out.println("USER IS GETTING INSERTED : "+user.getName()+" "+user.getSurname());
+                preparedStatement.setString(1,user.getName());
+                preparedStatement.setString(2, user.getSurname());
+                preparedStatement.setString(3, user.getEmail());
+                preparedStatement.setString(4, user.getPassword());
+
+
+                preparedStatement.executeUpdate();
+                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+                //Checking the process if done
+                System.out.println("RESULT-SET GEN-KEYS : "+resultSet);
+                //Registered
+                success = 1;
+            } else {
+                //Blacklisted email
+                success = 2;
+            }
+
+            System.out.println("USER REGISTERED STATE -> "+success);
+            return success;
 
         } catch (SQLException e) {
-            //TODO: HANDLE THE EXCEPTION
+            //TODO: HANDLE THE EXCEPTION IN A BETTER WAY
+            throw new SQLException(e);
         }
     }
 
@@ -207,7 +233,86 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
         return userId;
     }
 
-    public List findAll() {
-        return null;
+    public boolean userIsAdmin(long userId) {
+        User user = findById(userId);
+        if (user != null) {
+            return user.getRole().equals("Admin");
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int deleteUser(String userEmail) throws SQLException {
+        User user = findByEmail(userEmail);
+
+        if (user != null && !user.getRole().equals("Admin")) {
+            //Deleting the user
+            try (Connection connection = dataSource.getConnection()) {
+                //Deleting the cookies associated with the user
+                PreparedStatement deleteUserCookiesPreparedStatement = connection.prepareStatement(DELETE_FROM_USERS_COOKIES+"?");
+                deleteUserCookiesPreparedStatement.setLong(1,user.getId());
+                deleteUserCookiesPreparedStatement.executeUpdate();
+                System.out.println("USER COOKIES HAS BEEN DELETED!");
+
+                //Deleting user's published products
+                PreparedStatement deleteUserProductsPreparedStatement = connection.prepareStatement(DELETE_USERS_PRODUCTS_FROM_PRODUCTS+"?");
+                deleteUserProductsPreparedStatement.setLong(1,user.getId());
+                deleteUserProductsPreparedStatement.executeUpdate();
+                System.out.println("USER PRODUCTS HAS BEEN DELETED!");
+
+                //Deleting the user
+                PreparedStatement deleteUserPreparedStatement = connection.prepareStatement(DELETE_FROM_USERS+"(?)");
+                deleteUserPreparedStatement.setString(1,userEmail);
+                deleteUserPreparedStatement.executeUpdate();
+                System.out.println("USER HAS BEEN DELETED -> "+userEmail);
+
+                //BlackListing user's email
+                PreparedStatement blackListUserEmail = connection.prepareStatement(INSERT_INTO_USERS_BLACKLIST+"(?)");
+                blackListUserEmail.setString(1,userEmail);
+                blackListUserEmail.executeUpdate();
+                System.out.println("USER HAS BEEN BLACK LISTED!");
+
+                return 1;
+            } catch (SQLException e) {
+                throw new SQLException(e);
+            }
+        } else if (user == null ){
+            //User ain't exist
+            System.out.println("NULL VALUE! CAN'T DELETE A NULL USER -> "+userEmail);
+            return 0;
+        } else {
+            System.out.println("Admin! CAN'T DELETE AN ADMIN -> "+userEmail);
+            return 2;
+        }
+    }
+
+    public List<User> findAll() {
+        List<User> users = new ArrayList<>();
+        try {
+            Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_USERS);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                User user = User.builder()
+                        .id(resultSet.getLong("id"))
+                        .name(resultSet.getString("name"))
+                        .surname(resultSet.getString("surname"))
+                        .age(resultSet.getInt("age"))
+                        .number(resultSet.getString("number"))
+                        .address(resultSet.getString("address"))
+                        .email(resultSet.getString("email"))
+                        .password(resultSet.getString("password"))
+                        .role(resultSet.getString("role"))
+                        .build();
+                users.add(user);
+            }
+            return users;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error registering user: " + e.getMessage(), e);
+        }
     }
 }

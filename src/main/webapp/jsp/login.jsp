@@ -18,6 +18,7 @@
     <c:if test="${ loginErrorMessage != null }">
         <p style="color: #641515; font-weight: bold; margin: 1.5em"><strong>${loginErrorMessage}</strong></p>
     </c:if>
+
     <h1>Welcome Back!</h1>
     <form action="/login" method="post">
         <div class="mb-3 row">

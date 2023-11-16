@@ -3,7 +3,7 @@ package org.AGES.dto;
 import lombok.Data;
 
 @Data
-public class ProductAddFrom {
+public class ProductAddForm {
     private long id;
     private String productName;
     private String productDescription;

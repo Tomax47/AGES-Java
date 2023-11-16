@@ -4,6 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface CRUDRepo<T> {
-    void save(T object) throws SQLException;
+    int save(T object) throws SQLException;
     List<T> findAll();
 }

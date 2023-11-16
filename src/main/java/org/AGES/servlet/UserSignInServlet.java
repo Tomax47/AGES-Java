@@ -6,7 +6,6 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.UUID;
@@ -51,6 +50,10 @@ public class UserSignInServlet extends HttpServlet {
                                 session.setAttribute("authenticated", true);
                                 session.setAttribute("userId",userId);
 
+                                boolean userIsAdmin = userCRUDRepo.userIsAdmin(userId);
+                                session.setAttribute("Admin", userIsAdmin);
+                                System.out.println("ADMIN -> "+userIsAdmin);
+
                                 System.out.println("\n\nLOGGED THE USER IN USING THE LOGIN COOKIE!!!");
                                 resp.sendRedirect("/");
 
@@ -84,6 +87,10 @@ public class UserSignInServlet extends HttpServlet {
                 if (userId != 0) {
                     httpSession.setAttribute("userId", userId);
                     httpSession.setAttribute("authenticated",true);
+
+                    boolean userIsAdmin = userCRUDRepo.userIsAdmin(userId);
+                    httpSession.setAttribute("Admin", userIsAdmin);
+                    System.out.println("ADMIN -> "+userIsAdmin);
                 }
 
                 //Saving the userId & the LoginCookieUUID into the DB

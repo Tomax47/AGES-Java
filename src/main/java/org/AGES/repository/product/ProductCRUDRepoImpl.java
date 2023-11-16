@@ -47,21 +47,28 @@ public class ProductCRUDRepoImpl implements ProductCRUDRepo{
     }
 
     @Override
-    public void save(Product product) throws SQLException {
+    public int save(Product product) throws SQLException {
         System.out.println("PRODUCT IS BEING SAVE AFTER THE REGISTRATION FORM CALLED THE METHOD!");
-        Connection connection = dataSource.getConnection();
         System.out.println("PRODUCT IS GETTING INSERTED : "+product.getProductName());
-        PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_PRODUCTS+"(?,?,?,?,?)");
-        preparedStatement.setString(1, product.getProductName());
-        preparedStatement.setString(2, product.getProductDescription());
-        preparedStatement.setDouble(3,product.getPrice());
-        preparedStatement.setLong(4, product.getSellerId());
-        preparedStatement.setBytes(5,product.getProductImage());
 
-        preparedStatement.executeUpdate();
-        ResultSet resultSet = preparedStatement.getGeneratedKeys();
-        //Checking the process if done
-        System.out.println("RESULT-SET GEN-KEYS : "+resultSet+" -> PRODUCT HAS BEEN SAVED!");
+        try (Connection connection = dataSource.getConnection()){
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_PRODUCTS+"(?,?,?,?,?)");
+            preparedStatement.setString(1, product.getProductName());
+            preparedStatement.setString(2, product.getProductDescription());
+            preparedStatement.setDouble(3,product.getPrice());
+            preparedStatement.setLong(4, product.getSellerId());
+            preparedStatement.setBytes(5,product.getProductImage());
+
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            //Checking the process if done
+            System.out.println("RESULT-SET GEN-KEYS : "+resultSet+" -> PRODUCT HAS BEEN SAVED!");
+
+            //TODO: TAKE INTO ACCOUNT THE 0 RETURNED VALUE
+            return 1;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

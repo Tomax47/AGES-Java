@@ -20,6 +20,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService{
     @Override
     public int register(RegisterForm registerForm) throws SQLException {
 
+        //Checking the correctness of the inputted data
         if (isNotNullOrEmptyString(registerForm.getName()) && isNotNullOrEmptyString(registerForm.getSurname()) &&
                 isNotNullOrEmptyString(registerForm.getEmail()) &&
                 isNotNullOrEmptyString(registerForm.getPassword())) {
@@ -31,8 +32,18 @@ public class UserRegistrationServiceImpl implements UserRegistrationService{
                     .password(passwordEncoder.encode(registerForm.getPassword()))
                     .build();
 
-            userCRUDRepo.save(user);
-            return 1;
+            int isRegistered = userCRUDRepo.save(user);
+
+            if (isRegistered == 1) {
+                //Registered User
+                return 1;
+            } else if (isRegistered == 2) {
+                //Blacklisted Email
+                return 2;
+            } else {
+                //Failure
+                return 0;
+            }
         } else {
             System.out.println("NULL VALUES PROHIBITED THE USER FROM BEING REGISTERED!");
             return 0;
@@ -40,7 +51,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService{
     }
 
     private boolean isNotNullOrEmptyString(String string) {
-        return !string.equals(null) && string.length() > 4;
+        return !string.isBlank() && string.length() >= 4;
     }
 
 }

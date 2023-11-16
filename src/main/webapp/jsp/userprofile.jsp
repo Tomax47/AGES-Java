@@ -28,6 +28,11 @@
             <input type="submit" value="Update">
         </form>
     </c:if>
+
+    <!-- FIX THE CODE BELOW SO IT SHOWS THE LINK FOR THE ADMINS -->
+    <c:if test="${ user.getRole().equals(String.valueOf('Admin')) }">
+        <a class="nav-link active" aria-current="page" href="/users_index" style="font-weight: bold; color: #641515; font-size: 1.5em; margin-top: 1em">Admin Panel</a>
+    </c:if>
 </center>
 </body>
 </html>

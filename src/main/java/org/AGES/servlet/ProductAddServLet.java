@@ -1,6 +1,6 @@
 package org.AGES.servlet;
 
-import org.AGES.dto.ProductAddFrom;
+import org.AGES.dto.ProductAddForm;
 import org.AGES.repository.product.ProductRegistrationService;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -36,17 +36,17 @@ public class ProductAddServLet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ProductAddFrom productAddFrom = new ProductAddFrom();
+        ProductAddForm productAddForm = new ProductAddForm();
 
         //Getting the id of the user that's currently logged in!
         HttpSession session = req.getSession();
         Long userId = (Long) session.getAttribute("userId");
 
-        productAddFrom.setProductName(req.getParameter("product_name"));
-        System.out.println(productAddFrom.getProductName());
-        productAddFrom.setProductDescription(req.getParameter("product_description"));
-        productAddFrom.setPrice(Double.parseDouble(req.getParameter("price")));
-        productAddFrom.setSellerId(userId);
+        productAddForm.setProductName(req.getParameter("product_name"));
+        System.out.println(productAddForm.getProductName());
+        productAddForm.setProductDescription(req.getParameter("product_description"));
+        productAddForm.setPrice(Double.parseDouble(req.getParameter("price")));
+        productAddForm.setSellerId(userId);
 
 
         //Fetching the image
@@ -61,11 +61,11 @@ public class ProductAddServLet extends HttpServlet {
             inputStream.read(image);
         }
 
-        productAddFrom.setProductImage(image);
+        productAddForm.setProductImage(image);
 
         System.out.println("Product registration form completed -> Calling addProduct method");
         try {
-            productRegistrationService.addProduct(productAddFrom);
+            productRegistrationService.addProduct(productAddForm);
             resp.sendRedirect("/");
         } catch (SQLException e) {
             //TODO: HANDLE IN A BETTER WAY

@@ -1,7 +1,8 @@
 package org.AGES.servlet;
 
-import org.AGES.model.User;
+import org.AGES.dto.UserDto;
 import org.AGES.repository.user.UserCRUDRepo;
+import org.AGES.repository.user.UserGetInformationService;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -19,11 +20,13 @@ import java.sql.SQLException;
 @WebServlet("/profile")
 public class UserProfileServLet extends HttpServlet {
     private UserCRUDRepo userCRUDRepo;
+    private UserGetInformationService userGetInformationService;
 
     @Override
     public void init() throws ServletException {
         ServletContext servletContext = getServletContext();
         userCRUDRepo = (UserCRUDRepo) servletContext.getAttribute("UserCRUDRepo");
+        userGetInformationService = (UserGetInformationService) servletContext.getAttribute("UserGetInformationService");
     }
 
     @Override
@@ -31,7 +34,12 @@ public class UserProfileServLet extends HttpServlet {
         //TODO: CHECK OUT WHY THE IMAGE IS DISPLAYING DECODED! + EDIT THE METHOD SO IT SEND THE USER'S NECESSARY INFO ONLY AND NOT ALL OF THE USER'S INTO AS A USER OBJECT!
         HttpSession session = req.getSession();
         Long userId = (Long) session.getAttribute("userId");
-        User user = userCRUDRepo.findById(userId);
+        UserDto user = null;
+        try {
+            user = userGetInformationService.getUserInformation(userId);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         //Passing the user in
         req.setAttribute("user", user);

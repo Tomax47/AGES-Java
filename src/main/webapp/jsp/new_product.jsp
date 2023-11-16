@@ -23,7 +23,7 @@
         <div class="section">
             <label class="label">Description :</label>
             <div class="field">
-                <input type="text" name="product_description">
+                <input type="text" name="product_description" style="width: 12em; height: 4em">
             </div>
         </div>
         <div class="section">

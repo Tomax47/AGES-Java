@@ -1,6 +1,7 @@
-package org.AGES.servlet;
+package org.AGES.servlet.product;
 
 import org.AGES.dto.ProductAddForm;
+import org.AGES.repository.file.FileRWService;
 import org.AGES.repository.product.ProductRegistrationService;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -19,15 +20,14 @@ import java.sql.SQLException;
 
 @WebServlet("/new_product")
 public class ProductAddServLet extends HttpServlet {
-    private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "1234";
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/ancient_goods_estore";
     private ProductRegistrationService productRegistrationService;
+    private FileRWService fileRWService;
 
     @Override
     public void init() throws ServletException {
         ServletContext servletContext = getServletContext();
         productRegistrationService = (ProductRegistrationService) servletContext.getAttribute("ProductRegistrationService");
+        fileRWService = (FileRWService) servletContext.getAttribute("fileRWService");
     }
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -49,23 +49,15 @@ public class ProductAddServLet extends HttpServlet {
         productAddForm.setSellerId(userId);
 
 
-        //Fetching the image
-        Part filePart = req.getPart("image");
-        System.out.println(filePart.getName());
+        // Image fetching
+        Part part = req.getPart("image");
 
-        byte[] image = null;
-
-        if (filePart != null) {
-            InputStream inputStream = filePart.getInputStream();
-            image = new byte[(int) filePart.getSize()];
-            inputStream.read(image);
-        }
-
-        productAddForm.setProductImage(image);
-
-        System.out.println("Product registration form completed -> Calling addProduct method");
         try {
-            productRegistrationService.addProduct(productAddForm);
+            Long productId = productRegistrationService.addProduct(productAddForm);
+            if (productId != null) {
+                //Saving the product's image!
+                fileRWService.saveFileToStorage(part.getInputStream(), part.getSubmittedFileName(), part.getContentType(), part.getSize(), null, productId);
+            }
             resp.sendRedirect("/");
         } catch (SQLException e) {
             //TODO: HANDLE IN A BETTER WAY

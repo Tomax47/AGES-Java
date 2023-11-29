@@ -15,32 +15,40 @@
 <body>
 <%@include file="navbar.jsp" %>
 <center>
-    <c:if test="${ loginErrorMessage != null }">
-        <p style="color: #641515; font-weight: bold; margin: 1.5em"><strong>${loginErrorMessage}</strong></p>
-    </c:if>
 
-    <h1>Welcome Back!</h1>
-    <form action="/login" method="post">
-        <div class="mb-3 row">
-            <div class="email-label">
-                <label class="col-sm-2 col-form-label">Email</label>
-            </div>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" name="email">
-            </div>
+    <div class="cardContainer">
+        <div class="card">
+            <p class="login-header">Welcome Back!</p>
+
+            <c:if test="${ loginErrorMessage != null }">
+                <p style="color: #dc3545; font-weight: inherit;"><strong>${loginErrorMessage}</strong></p>
+            </c:if>
+
+            <form action="/login" method="post">
+                <div class="mb-3 row">
+                    <div class="email-label">
+                        <label class="input-label">Email</label>
+                    </div>
+                    <div class="email-div">
+                        <input type="text" class="input-div" name="email">
+                    </div>
+                </div>
+                <div class="password-div">
+                    <div class="psswd-label">
+                        <label class="input-label">Password</label>
+                    </div>
+                    <div class="col-sm-10">
+                        <input type="password" class="input-div" name="password">
+                    </div>
+                </div>
+                <div class="login-btn">
+                    <input type="submit" class="btn btn-outline-danger" value="Login">
+                </div>
+            </form>
+            <p class="bottom-form-line">Don't have an account?<span><a class="bottom-form-link" href="register"> Register</a></span></p>
         </div>
-        <div class="mb-3 row">
-            <div class="psswd-label">
-                <label class="col-sm-2 col-form-label">Password</label>
-            </div>
-            <div class="col-sm-10">
-                <input type="password" class="form-control" name="password">
-            </div>
-        </div>
-        <div class="login-btn">
-            <input type="submit" class="btn btn-outline-danger" value="Login">
-        </div>
-    </form>
+    </div>
 </center>
+<%@include file="footer.jsp"%>
 </body>
 </html>

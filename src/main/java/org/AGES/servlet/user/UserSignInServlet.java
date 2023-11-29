@@ -1,4 +1,4 @@
-package org.AGES.servlet;
+package org.AGES.servlet.user;
 
 import org.AGES.repository.user.UserCRUDRepo;
 import javax.servlet.ServletContext;
@@ -12,10 +12,6 @@ import java.util.UUID;
 
 @WebServlet("/login")
 public class UserSignInServlet extends HttpServlet {
-
-    private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "1234";
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/ancient_goods_estore";
     private static final String invalidCredentialsErrorMsg = "Invalid Email Or Password!";
 
     private UserCRUDRepo userCRUDRepo;
@@ -52,9 +48,8 @@ public class UserSignInServlet extends HttpServlet {
 
                                 boolean userIsAdmin = userCRUDRepo.userIsAdmin(userId);
                                 session.setAttribute("Admin", userIsAdmin);
-                                System.out.println("ADMIN -> "+userIsAdmin);
 
-                                System.out.println("\n\nLOGGED THE USER IN USING THE LOGIN COOKIE!!!");
+                                System.out.println("\n\nLOGGED THE USER IN USING THE LOGIN COOKIE!! -> UserIsAdmin? -> "+userIsAdmin);
                                 resp.sendRedirect("/");
 
                                 //Redirecting to the main page, if the user is logged in without sending a loginCookie login request again!
@@ -70,6 +65,63 @@ public class UserSignInServlet extends HttpServlet {
         } else {
             req.getRequestDispatcher("jsp/login.jsp").forward(req,resp);
         }
+
+        //TODO: REALIZE THE OLD METHOD IN A BETTER WAY
+//        Cookie[] cookies = req.getCookies();
+
+        ////Checking for an existence of the loginCookie in the cookies list
+//        if (cookies != null) {
+//            for (Cookie cookie : cookies) {
+//                if (cookie.getName().equals("login")) {
+//                    String uuid = cookie.getValue();
+//                    try {
+//                        ////Checking if the browser's cookie exist in the DB
+//                        boolean cookieExist = userCRUDRepo.cookieExistInDatabase(uuid);
+//                        if (cookieExist) {
+//                            ////Checking the userId by the loginCookieUUID
+//                            long userId = userCRUDRepo.checkUserExistenceByLoginCookie(uuid);
+//                            if (userId != 0) {
+//                                HttpSession session = req.getSession();
+//                                Boolean userIsAuthenticated = (Boolean) session.getAttribute("authenticated");
+//
+//                                ////Checking if the user is actually logged in
+//                                if (userIsAuthenticated == null) {
+//                                    session.setAttribute("authenticated", true);
+//                                    session.setAttribute("userId",userId);
+//
+//                                    boolean userIsAdmin = userCRUDRepo.userIsAdmin(userId);
+//                                    session.setAttribute("Admin", userIsAdmin);
+//                                    System.out.println("ADMIN -> "+userIsAdmin);
+//
+//                                    System.out.println("\n\nLOGGED THE USER IN USING THE LOGIN COOKIE!!!");
+//                                    resp.sendRedirect("/");
+//
+//                                    ////Redirecting to the main page, if the user is logged in without sending a loginCookie login request again!
+//                                } else {
+//                                    resp.sendRedirect("/");
+//                                }
+//                            } else {
+//                                ////User has been deleted
+//                                System.out.println("USER AINT EXIST ANYMORE, EXPIRING THE COOKIE");
+//                                cookies = deleteCookie(cookies, "login");
+//                                resp.sendRedirect("/login");
+//                            }
+//                        } else {
+//                            ////Browser's cookie ain't valid based on the DB data
+//                            System.out.println("THE COOKIE ON BROWSER AINT EXIST ANYMORE, EXPIRING THE COOKIE");
+//                            cookies = deleteCookie(cookies, "login");
+//                            resp.sendRedirect("/login");
+//                        }
+//                    } catch (SQLException e) {
+//                        ////TODO: HANDLE THE EXCEPTION!
+//                    }
+//                } else {
+//                    System.out.println("COOKIE AINT A LOGIN ONE");
+//                }
+//            }
+//        } else {
+//            req.getRequestDispatcher("jsp/login.jsp").forward(req,resp);
+//        }
     }
 
     @Override
@@ -139,4 +191,24 @@ public class UserSignInServlet extends HttpServlet {
     }
     //END
 
+    private Cookie[] deleteCookie(Cookie[] cookies, String cookieName) {
+        if (cookies.length > 0) {
+            int arrayLength = (cookies.length - 1);
+            int i =0;
+            Cookie[] cookiesArray = new Cookie[arrayLength];
+
+            for (Cookie cookie : cookies) {
+                if (!cookie.getName().equals(cookieName)) {
+                    cookiesArray[i] = cookie;
+                    i++;
+                } else {
+                    continue;
+                }
+            }
+
+            return cookiesArray;
+        } else {
+            return null;
+        }
+    }
 }

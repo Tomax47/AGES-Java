@@ -1,4 +1,4 @@
-package org.AGES.servlet;
+package org.AGES.servlet.user;
 
 import org.AGES.dto.RegisterForm;
 import org.AGES.repository.user.UserCRUDRepo;
@@ -15,13 +15,9 @@ import java.sql.SQLException;
 
 @WebServlet("/register")
 public class UserRegisterServLet extends HttpServlet {
-
-    private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "1234";
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/ancient_goods_estore";
     private static final String nullRegistrationValuesErrorMsg = "None of the fields must be left blank!";
     private static final String blackListedEmailError = "Can't use this email for registration, please use another email!";
-
+    private static final String weakPasswordError = "Password must be at least 6 char long";
     private UserCRUDRepo userCRUDRepo;
     private UserRegistrationService userRegistrationService;
 
@@ -53,6 +49,10 @@ public class UserRegisterServLet extends HttpServlet {
             } else if (isUserRegistered == 2) {
                 //Failure -> Blacklisted
                 req.getSession().setAttribute("registerErrorMessage", blackListedEmailError);
+                resp.sendRedirect("/register");
+            } else if (isUserRegistered == 3) {
+                //Weak password
+                req.getSession().setAttribute("registerErrorMessage", weakPasswordError);
                 resp.sendRedirect("/register");
             } else {
                 //Failure -> Other Errors

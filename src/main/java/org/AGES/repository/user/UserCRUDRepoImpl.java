@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class UserCRUDRepoImpl implements UserCRUDRepo{
 
@@ -18,10 +19,12 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     private static final String SELECT_USER_BY_ID = "SELECT * FROM users WHERE id=";
     private static final String INSERT_INTO_USERS_COOKIES = "INSERT INTO users_cookies(login_cookie_uuid,user_id) VALUES ";
     private static final String SELECT_USER_BY_LOGIN_COOKIE_UUID = "SELECT user_id FROM users_cookies WHERE login_cookie_uuid=";
-    private static final String UPDATE_USER_INFO = "UPDATE users SET name=?, surname=?, age=?, number=?, address=?, image=? WHERE id=?";
+    private static final String SELECT_COOKIE_UUID = "SELECT login_cookie_uuid FROM users_cookies WHERE login_cookie_uuid=";
+    private static final String UPDATE_USER_INFO = "UPDATE users SET name=?, surname=?, age=?, number=?, address=? WHERE id=?";
     private static final String DELETE_FROM_USERS = "DELETE FROM users WHERE email=";
     private static final String DELETE_FROM_USERS_COOKIES = "DELETE FROM users_cookies WHERE user_id=";
     private static final String DELETE_USERS_PRODUCTS_FROM_PRODUCTS = "DELETE FROM products WHERE seller_id=";
+    private static final String DELETE_USER_IMAGE_FROM_USERS_PROFILE_IMAGES = "DELETE FROM users_profile_images WHERE user_id=";
     private static final String INSERT_INTO_USERS_BLACKLIST = "INSERT INTO users_blacklist(email) VALUES ";
     private static final String SELECT_ALL_FROM_USERS_BLACKLIST = "SELECT * FROM users_blacklist WHERE email=";
 
@@ -138,7 +141,6 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
                         .address(resultSet.getString("address"))
                         .email(resultSet.getString("email"))
                         .password(resultSet.getString("password"))
-                        .image(resultSet.getBytes("image"))
                         .role(resultSet.getString("role"))
                         .build();
             }
@@ -165,7 +167,7 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     }
 
     @Override
-    public void updateUserInformation(String name, String surname, int age, String number, String address, String email, byte[] image, long userId) throws SQLException {
+    public void updateUserInformation(String name, String surname, int age, String number, String address, String email, long userId) throws SQLException {
         User user = findByEmail(email);
         System.out.println("User has been found |UPDATING| -> "+email);
         //Checking if user's req is valid & authorized
@@ -179,8 +181,7 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
                 preparedStatement.setInt(3,age);
                 preparedStatement.setString(4,number);
                 preparedStatement.setString(5,address);
-                preparedStatement.setBytes(6,image);
-                preparedStatement.setLong(7,user.getId());
+                preparedStatement.setLong(6,user.getId());
 
                 int affectedRows = preparedStatement.executeUpdate();
 
@@ -243,10 +244,32 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
     }
 
     @Override
+    public boolean cookieExistInDatabase(String cookieUUID) throws SQLException {
+        String databaseCookieUUID = null;
+        try (Connection connection = dataSource.getConnection()) {
+
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_COOKIE_UUID + "(?)");
+            preparedStatement.setString(1, cookieUUID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                databaseCookieUUID = resultSet.getString("login_cookie_uuid");
+            }
+        }
+
+        if (databaseCookieUUID == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
     public int deleteUser(String userEmail) throws SQLException {
         User user = findByEmail(userEmail);
 
-        if (user != null && !user.getRole().equals("Admin")) {
+        if (user != null) {
             //Deleting the user
             try (Connection connection = dataSource.getConnection()) {
                 //Deleting the cookies associated with the user
@@ -261,28 +284,60 @@ public class UserCRUDRepoImpl implements UserCRUDRepo{
                 deleteUserProductsPreparedStatement.executeUpdate();
                 System.out.println("USER PRODUCTS HAS BEEN DELETED!");
 
+                //Deleting user's image
+                PreparedStatement deleteUserImagePreparedStatement = connection.prepareStatement(DELETE_USER_IMAGE_FROM_USERS_PROFILE_IMAGES+"(?)");
+                deleteUserImagePreparedStatement.setLong(1, user.getId());
+                deleteUserImagePreparedStatement.executeUpdate();
+                System.out.println("USER'S PROFILE IMAGE HAS BEEN DELETED!");
+
                 //Deleting the user
                 PreparedStatement deleteUserPreparedStatement = connection.prepareStatement(DELETE_FROM_USERS+"(?)");
                 deleteUserPreparedStatement.setString(1,userEmail);
                 deleteUserPreparedStatement.executeUpdate();
                 System.out.println("USER HAS BEEN DELETED -> "+userEmail);
 
-                //BlackListing user's email
-                PreparedStatement blackListUserEmail = connection.prepareStatement(INSERT_INTO_USERS_BLACKLIST+"(?)");
-                blackListUserEmail.setString(1,userEmail);
-                blackListUserEmail.executeUpdate();
-                System.out.println("USER HAS BEEN BLACK LISTED!");
-
                 return 1;
             } catch (SQLException e) {
                 throw new SQLException(e);
             }
-        } else if (user == null ){
+        } else {
             //User ain't exist
             System.out.println("NULL VALUE! CAN'T DELETE A NULL USER -> "+userEmail);
             return 0;
+        }
+    }
+
+    @Override
+    public int banUser(String email) throws SQLException {
+        User user = findByEmail(email);
+
+        if (user != null && !user.getRole().equals("Admin")) {
+            //User exist & ain't an Admin
+            int deleteUser = deleteUser(email);
+
+            if (deleteUser == 1) {
+                try (Connection connection = dataSource.getConnection()){
+
+                    //BlackListing user's email
+                    PreparedStatement blackListUserEmail = connection.prepareStatement(INSERT_INTO_USERS_BLACKLIST+"(?)");
+                    blackListUserEmail.setString(1,email);
+                    blackListUserEmail.executeUpdate();
+                    System.out.println("USER HAS BEEN BLACK LISTED!");
+
+                    return 1;
+                } catch (SQLException e) {
+                    throw new SQLException(e);
+                }
+            } else {
+                return 0;
+            }
+        } else if (user == null) {
+            //User ain't exist
+            System.out.println("USER AIN'T EXIST -> CAN'T BAN A NULL VALUED USER!");
+            return 0;
         } else {
-            System.out.println("Admin! CAN'T DELETE AN ADMIN -> "+userEmail);
+            //User is Admin
+            System.out.println("USER IS AN ADMIN -> CAN'T BAN AN ADMIN!");
             return 2;
         }
     }

@@ -1,5 +1,9 @@
 package org.AGES.listener;
 
+import org.AGES.repository.file.FileCRUDRepo;
+import org.AGES.repository.file.FileCRUDRepoImpl;
+import org.AGES.repository.file.FileRWService;
+import org.AGES.repository.file.FileRWServiceImpl;
 import org.AGES.repository.product.ProductCRUDRepo;
 import org.AGES.repository.product.ProductCRUDRepoImpl;
 import org.AGES.repository.product.ProductRegistrationService;
@@ -41,6 +45,12 @@ public class CustomServletContextListener implements ServletContextListener {
         servletContext.setAttribute("ProductCRUDRepo", productCRUDRepo);
         ProductRegistrationService productRegistrationService = new ProductRegistrationServiceImpl(productCRUDRepo);
         servletContext.setAttribute("ProductRegistrationService", productRegistrationService);
+
+        //FileInfo
+        FileCRUDRepo fileCRUDRepo = new FileCRUDRepoImpl(dataSource);
+        servletContext.setAttribute("fileCRUDRepo", fileCRUDRepo);
+        FileRWService fileRWService = new FileRWServiceImpl(fileCRUDRepo);
+        servletContext.setAttribute("fileRWService",fileRWService);
     }
 
     @Override

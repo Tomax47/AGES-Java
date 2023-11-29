@@ -1,16 +1,269 @@
 body {
     font-family: 'MedievalSharp';font-size: 22px;
+    background-color: #000000;
 }
 
 h1 {
-    color: #312e2e;
+    color: azure;
     align-self: center;
-    margin: 1em;
+    margin: 3em;
     font-size: 3em;
 }
 
+.navbar {
+    position: fixed;
+    backdrop-filter: blur(30px);
+    background-color: rgb(0, 0, 0, 0.520);
+    border: 1px solid rgba(255, 255, 255, 0.089);
+    cursor: pointer;
+}
+.nav-item-link {
+    color: azure;
+}
+
 .store-name {
-    color: #641515;
+    color: #dc3545;
     font-size: 1.5em;
 }
 
+.cardContainer {
+    width: fit-content;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10em;
+}
+
+.card {
+    position: relative;
+    min-width: 20em;
+    min-height: 15em;
+    max-height: 25em;
+    max-width: 27em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 10px;
+    border-radius: 10px;
+    backdrop-filter: blur(30px);
+    background-color: rgba(65, 65, 65, 0.308);
+    border: 1px solid rgba(255, 255, 255, 0.089);
+    cursor: pointer;
+}
+
+.profile-card {
+    position: relative;
+    max-height: 35em;
+    max-width: 27em;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 10px;
+    border-radius: 10px;
+    backdrop-filter: blur(30px);
+    background-color: rgba(65, 65, 65, 0.308);
+    border: 1px solid rgba(255, 255, 255, 0.089);
+    cursor: pointer;
+}
+
+.login-header {
+    font-weight: 700;
+    font-size: 0.9em;
+    letter-spacing: 1.2px;
+    color: white;
+}
+
+.login-btn {
+    margin-top: 1em;
+}
+
+.input-label {
+    font-weight: 500;
+    font-size: 0.7em;
+    letter-spacing: 1.2px;
+    color: azure;
+    margin: 0.5em 0 1em 0.5em;
+}
+
+.input-div {
+    border-radius: 20px;border-color: transparent;
+    background-color: transparent;
+    border-bottom-color: azure;
+    width: 8em;
+}
+
+.email-div, .password-div, .name-div, .surname-div {
+    align-content: center;
+}
+
+.cardContainer::before {
+    width: 100px;
+    height: 100px;
+    content: "";
+    position: absolute;
+    background-color: #dc3545;
+    z-index: -1;
+    border-radius: 50%;
+    left: 100px;
+    top: 50px;
+    transition: all 1s;
+}
+
+.cardContainer:hover::before {
+    transform: translate(-50px, 50px);
+}
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 16px 20px 30px 20px;
+    display: flex;
+    align-items: center;
+    transition: 0.3s ease-out;
+    backdrop-filter: blur(8px) brightness(1.2);
+    -webkit-backdrop-filter: blur(8px) brightness(1.2);
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 16px
+}
+
+a {
+    color: azure;
+    margin: 0.5em 1em 1em 0;
+    font-weight: inherit;
+    font-size: 1.2em;
+    text-decoration: none;
+    transition-delay: 40ms;
+    transition-duration: 1s;
+    transition-property: color;
+}
+
+a:hover {
+    color: #dc3545;
+}
+
+.site-logo {
+    color: #dc3545;
+    margin: 0.5em 1em 1em 0;
+    font-weight: bold;
+    font-size: 2em;
+    text-decoration: none;
+}
+
+.logout-btn {
+    color: azure;
+    margin-bottom: 0.5em;
+    margin-left: 44em;
+    font-weight: inherit;
+    font-size: 1.2em;
+    background-color: transparent;
+    border-color: azure;
+    border-radius: 12px;
+    transition-delay: 40ms;
+    transition-duration: 1s;
+    transition-property: color;
+}
+
+.logout-btn:hover {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.bottom-form-line {
+    color: azure;
+    font-weight: inherit;
+    font-size: 0.7em;
+}
+
+.bottom-form-link {
+    text-decoration: none;
+    color: #dc3545;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.introduction-section {
+    background-color: azure;
+}
+
+.intro-section-header {
+    font-weight: bold;
+    color: #dc3545;
+    text-decoration: none;
+    border: black;
+    border-radius: 15px;
+    font-size: 3em
+}
+
+.intro-paragraph {
+    font-weight: inherit;
+    font-size: 0.8em;
+    color: black;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+.call-to-action-div {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.intro-call-to-action {
+    font-weight: bold;
+    color: #641515;
+    text-decoration: none;
+    border: black;
+    border-radius: 15px;
+    font-size: 1.3em
+}
+
+.seller-section {
+    background-color: black;
+}
+
+.seller-section-header {
+    font-weight: bold;
+    color: #dc3545;
+    text-decoration: none;
+    border-radius: 15px;
+    font-size: 3em
+}
+
+.seller-paragraph {
+    font-weight: inherit;
+    font-size: 0.8em;
+    color: azure;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+.seller-call-to-action {
+    font-weight: bold;
+    color: #641515;
+    text-decoration: none;
+    border-radius: 15px;
+    font-size: 1.3em
+}
+
+.extra-info {
+    height: 5em;
+}
+
+.admin-panel-link {
+    font-weight: bold;
+    color: #641515;
+    font-size: 1.5em;
+    margin-top: 1em;
+    transition-delay: 40ms;
+    transition-duration: 1s;
+    transition-property: color;
+}
+
+.admin-panel-link:hover {
+    cursor: pointer;
+    color: #dc3545;
+}

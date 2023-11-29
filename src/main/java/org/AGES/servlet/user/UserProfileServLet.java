@@ -1,6 +1,8 @@
-package org.AGES.servlet;
+package org.AGES.servlet.user;
 
 import org.AGES.dto.UserDto;
+import org.AGES.model.FileInfo;
+import org.AGES.repository.file.FileRWService;
 import org.AGES.repository.user.UserCRUDRepo;
 import org.AGES.repository.user.UserGetInformationService;
 import javax.servlet.ServletContext;
@@ -9,7 +11,6 @@ import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.SQLException;
 
 @MultipartConfig(
@@ -21,20 +22,22 @@ import java.sql.SQLException;
 public class UserProfileServLet extends HttpServlet {
     private UserCRUDRepo userCRUDRepo;
     private UserGetInformationService userGetInformationService;
+    private FileRWService fileRWService;
 
     @Override
     public void init() throws ServletException {
         ServletContext servletContext = getServletContext();
         userCRUDRepo = (UserCRUDRepo) servletContext.getAttribute("UserCRUDRepo");
         userGetInformationService = (UserGetInformationService) servletContext.getAttribute("UserGetInformationService");
+        fileRWService = (FileRWService) servletContext.getAttribute("fileRWService");
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        //TODO: CHECK OUT WHY THE IMAGE IS DISPLAYING DECODED! + EDIT THE METHOD SO IT SEND THE USER'S NECESSARY INFO ONLY AND NOT ALL OF THE USER'S INTO AS A USER OBJECT!
         HttpSession session = req.getSession();
         Long userId = (Long) session.getAttribute("userId");
         UserDto user = null;
+
         try {
             user = userGetInformationService.getUserInformation(userId);
         } catch (SQLException e) {
@@ -57,21 +60,15 @@ public class UserProfileServLet extends HttpServlet {
         HttpSession session = req.getSession();
         long userId = (Long) session.getAttribute("userId");
 
-        //Fetching the image
-        Part filePart = req.getPart("image");
+        // Image fetching
+        Part part = req.getPart("image");
 
-        byte[] image = null;
-
-        if (filePart != null) {
-            InputStream inputStream = filePart.getInputStream();
-            image = new byte[(int) filePart.getSize()];
-            inputStream.read(image);
-        }
-
-        System.out.println("Image :"+image);
-
+        //User & Image insertion
         try {
-            userCRUDRepo.updateUserInformation(name, surname, age, number, address, email, image, userId);
+            userCRUDRepo.updateUserInformation(name, surname, age, number, address, email, userId);
+            if (part.getSize() != 0) {
+                fileRWService.saveFileToStorage(part.getInputStream(), part.getSubmittedFileName(), part.getContentType(), part.getSize(), userId, null);
+            }
             resp.sendRedirect("/profile");
         } catch (SQLException e) {
             //TODO: HANDLE IN A BETTER WAY

@@ -5,5 +5,5 @@ import org.AGES.dto.ProductAddForm;
 import java.sql.SQLException;
 
 public interface ProductRegistrationService {
-    void addProduct(ProductAddForm productAddForm) throws SQLException;
+    Long addProduct(ProductAddForm productAddForm) throws SQLException;
 }

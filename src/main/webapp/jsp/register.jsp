@@ -16,41 +16,52 @@
 <%@include file="navbar.jsp" %>
 
 <center>
-    <c:if test="${ registerErrorMessage != null }">
-        <p style="color: #641515; font-weight: bold; margin: 1.5em"><strong>${ registerErrorMessage }</strong></p>
-    </c:if>
+    <div class="cardContainer">
+        <div class="card">
+            <p class="login-header">Create New Account</p>
 
-    <h1>Create A New Account</h1>
-    <form action="/register" method="post">
-        <div class="mb-3 row">
-            <label for="staticEmail" class="col-sm-2 col-form-label">Name</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="staticName" name="name">
-            </div>
+            <c:if test="${ registerErrorMessage != null }">
+                <p style="color: #dc3545; font-weight: inherit;"><strong>${ registerErrorMessage }</strong></p>
+            </c:if>
+
+            <form action="/register" method="post">
+                <div class="mb-3 row">
+                    <label class="input-label">Name</label>
+                    <div class="name-div">
+                        <input type="text" class="input-div" name="name">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="input-label">Surname</label>
+                    <div class="surname-div">
+                        <input type="text" class="input-div" name="surname">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <div class="email-label">
+                        <label class="input-label">Email</label>
+                    </div>
+                    <div class="email-div">
+                        <input type="text" class="input-div" name="email">
+                    </div>
+                </div>
+                <div class="password-div">
+                    <div class="psswd-label">
+                        <label class="input-label">Password</label>
+                    </div>
+                    <div class="col-sm-10">
+                        <input type="password" class="input-div" name="password">
+                    </div>
+                </div>
+                <div class="login-btn">
+                    <input type="submit" class="btn btn-outline-danger" value="Register">
+                </div>
+            </form>
+            <p class="bottom-form-line">Already have an account?<span><a class="bottom-form-link" href="login"> Login</a></span></p>
         </div>
-        <div class="mb-3 row">
-            <label for="staticEmail" class="col-sm-2 col-form-label">Surname</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" id="staticSurname" name="surname">
-            </div>
-        </div>
-        <div class="mb-3 row">
-            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
-            <div class="col-sm-10">
-                <input type="email" class="form-control" id="staticEmail" name="email">
-            </div>
-        </div>
-        <div class="mb-3 row">
-            <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
-            <div class="col-sm-10">
-                <input type="password" class="form-control" id="inputPassword" name="password">
-            </div>
-        </div>
-        <div class="registration-btn">
-            <input type="submit" class="btn btn-outline-danger" value="Register">
-        </div>
-    </form>
+    </div>
 
 </center>
+<%@include file="footer.jsp"%>
 </body>
 </html>

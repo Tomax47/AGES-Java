@@ -1,4 +1,4 @@
-package org.AGES.servlet;
+package org.AGES.servlet.product;
 
 import org.AGES.model.Product;
 import org.AGES.repository.product.ProductCRUDRepo;
@@ -13,9 +13,6 @@ import java.util.List;
 
 @WebServlet("/products")
 public class ProductsIndexServLet extends HttpServlet {
-    private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "1234";
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/ancient_goods_estore";
     private ProductCRUDRepo productCRUDRepo;
 
     @Override
@@ -35,5 +32,6 @@ public class ProductsIndexServLet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //TODO: IMPLEMENT BUY DEF
     }
 }

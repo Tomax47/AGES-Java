@@ -1,4 +1,4 @@
-package org.AGES.servlet;
+package org.AGES.servlet.user;
 
 import org.AGES.dto.UserDto;
 import org.AGES.repository.user.UserCRUDRepo;
@@ -42,7 +42,7 @@ public class UsersDisplayServLet extends HttpServlet {
         String userEmail = req.getParameter("user_email");
 
         try {
-            int deleteUser = userCRUDRepo.deleteUser(userEmail);
+            int deleteUser = userCRUDRepo.banUser(userEmail);
 
             if (deleteUser == 1){
                 //User has been baned

@@ -20,7 +20,6 @@ public class UserDto {
     private byte[] image;
     private String role;
 
-    //TODO: TO USE LATER ON
     public boolean isAdmin() {
         return this.role.equals("Admin");
     }

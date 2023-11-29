@@ -1,4 +1,4 @@
-package org.AGES.servlet;
+package org.AGES.servlet.user;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

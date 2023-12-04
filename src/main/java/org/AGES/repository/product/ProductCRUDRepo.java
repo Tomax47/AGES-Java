@@ -12,7 +12,11 @@ public interface ProductCRUDRepo extends CRUDRepo<Product> {
     Long saveProduct(Product product) throws SQLException;
     Long getProductId(Connection connection, String productName, String productDescription) throws SQLException;
     int deleteProduct(long productId, long userId);
+    int deleteProductWhenBuy(long productId);
     Product findById(long productId);
     List<Product> findUserProducts(long userId) throws SQLException;
+    List<Product> findUserPurchasedProducts(long userId) throws SQLException;
+
+    int saveToSoldProducts(Product boughtProduct, long buyerId) throws SQLException;
 
 }

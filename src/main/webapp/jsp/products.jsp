@@ -39,11 +39,16 @@
             <p class="text-card" style="color: azure; text-overflow: ellipsis; width: 20em"><%= product.getProductDescription() %></p>
             <p class="text-card" style="color: azure;"><strong>Price: $</strong><%= product.getPrice() %></p>
             <input type="hidden" name="product_id" value="<%= product.getId() %>">
+            <% if ((Long) session.getAttribute("userId") == null) {%>
+            <a href="/login" style="color: #641515">Buy</a>
+            <% } else { %>
             <% if (product.getSellerId() != (Long) session.getAttribute("userId")) { %>
             <input class="btn btn-outline-danger" type="submit" value="Buy">
             <% } else { %>
             <a href="/published_products">Check In Dashboard</a>
             <% } %>
+            <% } %>
+
           </form>
         </div>
       </div>

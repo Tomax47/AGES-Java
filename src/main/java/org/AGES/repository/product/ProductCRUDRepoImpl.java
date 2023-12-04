@@ -17,6 +17,8 @@ public class ProductCRUDRepoImpl implements ProductCRUDRepo{
     private static final String SELECT_USER_PRODUCTS = "SELECT * FROM products WHERE seller_id=";
     private static final String DELETE_PRODUCT_FROM_PRODUCTS = "DELETE FROM products WHERE id=";
     private static final String SELECT_PRODUCT_FROM_PRODUCTS = "SELECT * FROM products WHERE id=";
+    private static final String INSERT_INTO_SOLD_PRODUCTS = "INSERT INTO sold_products(id, product_name, product_description, price, seller_id, buyer_id) VALUES";
+    private static final String SELECT_FROM_SOLD_PRODUCTS_BY_USER_ID = "SELECT * FROM sold_products WHERE buyer_id=";
 
     public ProductCRUDRepoImpl(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -119,6 +121,29 @@ public class ProductCRUDRepoImpl implements ProductCRUDRepo{
     }
 
     @Override
+    public int deleteProductWhenBuy(long productId) {
+        //Deleting the product from the products table after it's been bought!
+        Product product = findById(productId);
+
+        if (product != null) {
+            try (Connection connection = dataSource.getConnection()) {
+                PreparedStatement preparedStatement = connection.prepareStatement(DELETE_PRODUCT_FROM_PRODUCTS+"(?)");
+                preparedStatement.setLong(1, productId);
+
+                preparedStatement.executeUpdate();
+                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+                System.out.println("PRODUCT HAS BEEN DELETED AFTER BEING BOUGHT -> "+resultSet);
+                return 1;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else  {
+            return 0;
+        }
+    }
+
+    @Override
     public List<Product> findUserProducts(long userId) throws SQLException {
         List<Product> products = new ArrayList<>();
         try {
@@ -144,6 +169,61 @@ public class ProductCRUDRepoImpl implements ProductCRUDRepo{
         }
 
         return products;
+    }
+
+    @Override
+    public List<Product> findUserPurchasedProducts(long userId) throws SQLException {
+        List<Product> products = new ArrayList<>();
+        try {
+            Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_FROM_SOLD_PRODUCTS_BY_USER_ID+"(?)");
+            preparedStatement.setLong(1, userId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Product product = Product.builder()
+                        .id(resultSet.getLong("id"))
+                        .productName(resultSet.getString("product_name"))
+                        .productDescription(resultSet.getString("product_description"))
+                        .price(resultSet.getDouble("price"))
+                        .sellerId(resultSet.getLong("seller_id"))
+                        .build();
+
+                products.add(product);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return products;
+    }
+
+    @Override
+    public int saveToSoldProducts(Product boughtProduct, long buyerId) throws SQLException {
+        //Checking for the existence of the product, and the non-emptiness of the userId
+        System.out.println("SAVING THE PRODUCT TO THE SOLD PRODUCTS TABLE!");
+        if (boughtProduct != null && !String.valueOf(buyerId).isBlank()) {
+            try (Connection connection = dataSource.getConnection()){
+                PreparedStatement preparedStatement = connection.prepareStatement(INSERT_INTO_SOLD_PRODUCTS+"(?,?,?,?,?,?)");
+                preparedStatement.setLong(1, boughtProduct.getId());
+                preparedStatement.setString(2, boughtProduct.getProductName());
+                preparedStatement.setString(3, boughtProduct.getProductDescription());
+                preparedStatement.setDouble(4,boughtProduct.getPrice());
+                preparedStatement.setLong(5, boughtProduct.getSellerId());
+                preparedStatement.setLong(6, buyerId);
+
+                preparedStatement.executeUpdate();
+
+                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+                return 1;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return 0;
+        }
     }
 
     @Override

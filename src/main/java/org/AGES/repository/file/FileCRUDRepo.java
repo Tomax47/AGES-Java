@@ -11,4 +11,5 @@ public interface FileCRUDRepo extends CRUDRepo<FileInfo> {
     FileInfo findByProductId(long productId) throws SQLException;
     int deleteProductImage(long productId) throws SQLException;
     int deleteUserProfileImage(long userId) throws SQLException;
+
 }

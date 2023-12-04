@@ -13,6 +13,5 @@ public class Product {
     private String productName;
     private String productDescription;
     private double price;
-//    private double rating; //TODO: ADD THE FEATURE
     private long sellerId;
 }

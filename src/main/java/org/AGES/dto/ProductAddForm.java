@@ -8,7 +8,6 @@ public class ProductAddForm {
     private String productName;
     private String productDescription;
     private double price;
-    //    private double rating; //TODO: ADD THE FEATURE
-    private byte[] productImage;
     private long sellerId;
+
 }

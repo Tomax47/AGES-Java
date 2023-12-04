@@ -17,7 +17,6 @@ public class UserDto {
     private String email;
     private String number;
     private String address;
-    private byte[] image;
     private String role;
 
     public boolean isAdmin() {
